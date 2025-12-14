@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+
+  backend:
+    build: ./ecom-backend
+    container_name: ecom_backend
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./ecom-backend/.env
+    volumes:
+      - ./ecom-backend:/app
+      - /app/node_modules
+    restart: unless-stopped
+
+  frontend:
+    build: ./ecom-frontend
+    container_name: ecom_frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - ./ecom-frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    restart: unless-stopped
