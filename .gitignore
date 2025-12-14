@@ -140,3 +140,4 @@ vite.config.ts.timestamp-*
 
 #nabil
 package-lock.json
+uploads/
