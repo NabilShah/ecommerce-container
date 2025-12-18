@@ -79,7 +79,7 @@ export default function Navbar() {
         </Toolbar>
       </AppBar>
 
-      {!isAdmin || !isDelivery && (
+      {!isAdmin && !isDelivery && (
         <Drawer anchor="right" open={mobileOpen} onClose={toggleDrawer} sx={{ "& .MuiDrawer-paper": { width: 240, backgroundColor: "#1976d2", color: "#fff", }, }} >
           <List>
             <ListItem button component={Link} to="/products" onClick={toggleDrawer} sx={{ "&:hover": { backgroundColor: "rgba(255,255,255,0.15)" } }} >
