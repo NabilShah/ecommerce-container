@@ -1,6 +1,7 @@
 import { useEffect, useState, useContext } from "react";
 import api from "../../api/axiosClient";
 import { Table, TableHead, TableRow, TableCell, TableBody, Container, Typography } from "@mui/material";
+import { TableContainer, Paper } from "@mui/material";
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
@@ -27,30 +28,32 @@ export default function DeliveryPartners() {
         Delivery Partners
       </Typography>
 
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>Name</TableCell>
-            <TableCell>Email</TableCell>
-            <TableCell>Phone</TableCell>
-            <TableCell>Status</TableCell>
-          </TableRow>
-        </TableHead>
-
-        <TableBody>
-          {partners.map((p) => (
-            <TableRow key={p._id}>
-              <TableCell>{p.name}</TableCell>
-              <TableCell>{p.email}</TableCell>
-              <TableCell>{p.phone || "N/A"}</TableCell>
-
-              <TableCell style={{ color: p.isAvailable ? "green" : "red" }}>
-                {p.isAvailable ? "Available" : "Busy"}
-              </TableCell>
+      <TableContainer component={Paper} sx={{ overflowX: "auto", maxWidth: "100%", }}>
+        <Table size="small" stickyHeader>
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 700, backgroundColor: "#f5f5f5" }}>Name</TableCell>
+              <TableCell sx={{ fontWeight: 700, backgroundColor: "#f5f5f5" }}>Email</TableCell>
+              <TableCell sx={{ fontWeight: 700, backgroundColor: "#f5f5f5" }}>Phone</TableCell>
+              <TableCell sx={{ fontWeight: 700, backgroundColor: "#f5f5f5" }}>Status</TableCell>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHead>
+
+          <TableBody>
+            {partners.map((p) => (
+              <TableRow key={p._id}>
+                <TableCell>{p.name}</TableCell>
+                <TableCell>{p.email}</TableCell>
+                <TableCell>{p.phone || "N/A"}</TableCell>
+
+                <TableCell style={{ color: p.isAvailable ? "green" : "red" }}>
+                  {p.isAvailable ? "Available" : "Busy"}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </Container>
   );
 }

@@ -2,6 +2,7 @@ import { useEffect, useState, useContext } from "react";
 import api from "../api/axiosClient";
 import { AuthContext } from "../context/AuthContext";
 import { Table, TableHead, TableRow, TableCell, TableBody, Container, Typography, Button,} from "@mui/material";
+import { TableContainer, Paper } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import socket, { joinDeliveryRoom } from "../sockets/customerSocket";
 
@@ -30,6 +31,14 @@ export default function DeliveryOrder() {
     }
     loadOrders();
   }, []);
+
+  const formatAddress = (shipping) => {
+    if (!shipping) return "—";
+
+    return [shipping.address, shipping.city, shipping.pin]
+      .filter(Boolean)
+      .join(", ");
+  };
 
   const updateStatus = async (orderId, newStatus) => {
     try {
@@ -113,97 +122,102 @@ export default function DeliveryOrder() {
             {status.replaceAll("_", " ")} ({grouped[status].length})
           </Typography>
 
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Order ID</TableCell>
-                <TableCell>Customer</TableCell>
-                <TableCell>Total</TableCell>
-                <TableCell>Actions / Status</TableCell>
-                <TableCell>Delivery Partner</TableCell>
-                <TableCell>Placed On</TableCell>
-              </TableRow>
-            </TableHead>
-
-            <TableBody>
-              {grouped[status].length === 0 ? (
+          <TableContainer component={Paper} sx={{ overflowX: "auto", maxWidth: "100%", }}>
+            <Table size="small" stickyHeader>
+              <TableHead>
                 <TableRow>
-                  <TableCell colSpan={6} style={{ textAlign: "center", padding: 20 }}>
-                    No orders in this category
-                  </TableCell>
+                  <TableCell sx={{ fontWeight: 700, backgroundColor: "#f5f5f5" }}>Order ID</TableCell>
+                  <TableCell sx={{ fontWeight: 700, backgroundColor: "#f5f5f5" }}>Customer</TableCell>
+                  <TableCell sx={{ fontWeight: 700, backgroundColor: "#f5f5f5" }}>Address</TableCell>
+                  <TableCell sx={{ fontWeight: 700, backgroundColor: "#f5f5f5" }}>Total</TableCell>
+                  <TableCell sx={{ fontWeight: 700, backgroundColor: "#f5f5f5" }}>Actions / Status</TableCell>
+                  <TableCell sx={{ fontWeight: 700, backgroundColor: "#f5f5f5" }}>Delivery Partner</TableCell>
+                  <TableCell sx={{ fontWeight: 700, backgroundColor: "#f5f5f5" }}>Placed On</TableCell>
                 </TableRow>
-              ) : (
-                grouped[status].map((o) => (
-                  <TableRow key={o._id}>
-                    <TableCell>{o._id}</TableCell>
+              </TableHead>
 
-                    <TableCell>
-                      {o.customer ? (
-                        <>
-                          <strong>{o.customer.name}</strong>
-                          <br />
-                          {o.customer.email}
-                          <br />
-                          {o.customer.phone}
-                        </>
-                      ) : (
-                        "Deleted User"
-                      )}
+              <TableBody>
+                {grouped[status].length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} style={{ textAlign: "center", padding: 20 }}>
+                      No orders in this category
                     </TableCell>
-
-                    <TableCell>₹{o.total}</TableCell>
-
-                    <TableCell>
-                    {status === o.status ? (
-                        o.status === "cancelled" ? (
-                          <span style={{ padding: "6px 12px", background: "#e0e0e0", color: "#555", borderRadius: "4px", fontWeight: 600, textTransform: "capitalize", display: "inline-block" }} >
-                            Cancelled
-                          </span>
-                        ) : o.status === "unassigned" ? (
-                        <Button variant="contained" color="primary" size="small"
-                            onClick={async () => {
-                            try {
-                                const res = await api.post(`/delivery/accept/${o._id}`);
-                                setOrders((prev) =>
-                                prev.map((ord) => (ord._id === o._id ? res.data.order : ord))
-                                );
-                            } catch (err) {
-                                console.error(err);
-                            }
-                            }}
-                        >
-                          Accept
-                        </Button>
-                        ) : (
-                        <select value={o.status} onChange={(e) => updateStatus(o._id, e.target.value)} style={{ padding: "6px", borderRadius: "4px" }} >
-                            <option value={o.status}>{o.status.replaceAll("_", " ")}</option>
-
-                            {o.status === "accepted" && <option value="picked_up">picked up</option>}
-                            {o.status === "picked_up" && <option value="on_the_way">on the way</option>}
-                            {o.status === "on_the_way" && <option value="delivered">delivered</option>}
-                        </select>
-                        )
-                    ) : null}
-                    </TableCell>
-
-                    <TableCell>
-                      {o.assignedTo ? (
-                        <>
-                          {o.assignedTo.name}
-                          <br />
-                          {o.assignedTo.phone}
-                        </>
-                      ) : (
-                        <span style={{ color: "red" }}>Unassigned</span>
-                      )}
-                    </TableCell>
-
-                    <TableCell>{new Date(o.createdAt).toLocaleString()}</TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                ) : (
+                  grouped[status].map((o) => (
+                    <TableRow key={o._id}>
+                      <TableCell>{o._id}</TableCell>
+
+                      <TableCell>
+                        {o.customer ? (
+                          <>
+                            <strong>{o.customer.name}</strong>
+                            <br />
+                            {o.customer.email}
+                            <br />
+                            {o.customer.phone}
+                          </>
+                        ) : (
+                          "Deleted User"
+                        )}
+                      </TableCell>
+
+                      <TableCell>{formatAddress(o.shipping)}</TableCell>
+
+                      <TableCell>₹{o.total}</TableCell>
+
+                      <TableCell>
+                      {status === o.status ? (
+                          o.status === "cancelled" ? (
+                            <span style={{ padding: "6px 12px", background: "#e0e0e0", color: "#555", borderRadius: "4px", fontWeight: 600, textTransform: "capitalize", display: "inline-block" }} >
+                              Cancelled
+                            </span>
+                          ) : o.status === "unassigned" ? (
+                          <Button variant="contained" color="primary" size="small"
+                              onClick={async () => {
+                              try {
+                                  const res = await api.post(`/delivery/accept/${o._id}`);
+                                  setOrders((prev) =>
+                                  prev.map((ord) => (ord._id === o._id ? res.data.order : ord))
+                                  );
+                              } catch (err) {
+                                  console.error(err);
+                              }
+                              }}
+                          >
+                            Accept
+                          </Button>
+                          ) : (
+                          <select value={o.status} onChange={(e) => updateStatus(o._id, e.target.value)} style={{ padding: "6px", borderRadius: "4px" }} >
+                              <option value={o.status}>{o.status.replaceAll("_", " ")}</option>
+
+                              {o.status === "accepted" && <option value="picked_up">picked up</option>}
+                              {o.status === "picked_up" && <option value="on_the_way">on the way</option>}
+                              {o.status === "on_the_way" && <option value="delivered">delivered</option>}
+                          </select>
+                          )
+                      ) : null}
+                      </TableCell>
+
+                      <TableCell>
+                        {o.assignedTo ? (
+                          <>
+                            {o.assignedTo.name}
+                            <br />
+                            {o.assignedTo.phone}
+                          </>
+                        ) : (
+                          <span style={{ color: "red" }}>Unassigned</span>
+                        )}
+                      </TableCell>
+
+                      <TableCell>{new Date(o.createdAt).toLocaleString()}</TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
         </Container>
       ))}
     </Container>
