@@ -45,10 +45,6 @@ export default function Products() {
     };
   }, []);
 
-  useEffect(() => {
-    console.log("Products from API:", products);
-  }, [products]);
-
   const filtered = products
     .filter((p) => p.name?.toLowerCase().includes(q.toLowerCase()))
     .sort((a, b) => {

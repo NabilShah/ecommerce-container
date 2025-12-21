@@ -30,8 +30,13 @@ export default function Login() {
 
     try {
       const res = await api.post("/auth/login", form);
-      login(res.data.token);
 
+      if (res.data.user.role !== "customer") {
+        setSnackbar({ open: true, message: "Access Denied: Not an Customer.", severity: "error", });
+        return;
+      }
+
+      login(res.data.token);
       setSnackbar({ open: true, message: "Login successful! Redirecting...", severity: "success", });
 
       setTimeout(() => navigate("/products"), 1500);
